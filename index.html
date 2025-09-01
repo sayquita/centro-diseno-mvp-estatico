@@ -244,213 +244,140 @@
   </div>
 
   <script>
-  /* ======= Estado global ======= */
   const state = {
-    plan: 'free',
-    currentView: 'galeria',
-    pill: 'mvp',
-    currentTpl: null, // guarda el id de la plantilla elegida
-    fotoUrl: null,
-  };
+      plan: 'free',
+      currentView: 'galeria',
+      pill: 'mvp',
+      currentTpl: null,
+      fotoUrl: null,
+    };
 
-  /* ======= Plantillas (dummy) =======
-     - disponible=false => bloqueado (Próximamente)
-     - premium=true => muestra badge Premium
-  */
-  const TEMPLATES = [
-    { id:'post-cuadrada-a',  name:'Publicación cuadrada', variant:'A', premium:false, disponible:true },
-    { id:'post-cuadrada-b',  name:'Publicación cuadrada', variant:'B', premium:false, disponible:true },
-    { id:'historia-vertical-a', name:'Historia vertical', variant:'A', premium:false, disponible:true },
-    { id:'historia-vertical-b', name:'Historia vertical', variant:'B', premium:true,  disponible:false }, // Próximamente
-    { id:'banner-feed-a',    name:'Banner feed FB',      variant:'A', premium:false, disponible:true },
-    { id:'banner-feed-b',    name:'Banner feed FB',      variant:'B', premium:false, disponible:true },
-    { id:'ficha-prop-a',     name:'Ficha propiedad',      variant:'A', premium:true,  disponible:false },
-    { id:'alquiler-dest-a',  name:'Alquiler destacado',   variant:'A', premium:false, disponible:true },
-    { id:'oportunidad-a',    name:'Oportunidad',          variant:'A', premium:false, disponible:true },
-  ];
-
-  /* ======= Navegación lateral ======= */
-  document.querySelectorAll('.side .item').forEach(el=>{
-    el.addEventListener('click',()=>{
-      document.querySelectorAll('.side .item').forEach(i=>i.classList.remove('active'));
-      el.classList.add('active');
-      const view = el.getAttribute('data-view');
-      showView(view);
+    document.querySelectorAll('.side .item').forEach(el=>{
+      el.addEventListener('click',()=>{
+        document.querySelectorAll('.side .item').forEach(i=>i.classList.remove('active'));
+        el.classList.add('active');
+        const view = el.getAttribute('data-view');
+        showView(view);
+      });
     });
-  });
-  function showView(view){
-    state.currentView = view;
-    document.querySelectorAll('.view').forEach(v=>v.style.display='none');
-    document.getElementById('view-'+view).style.display='block';
-  }
-
-  /* ======= Píldoras MVP / IA / Avanzado ======= */
-  document.querySelectorAll('.pill').forEach(p=>{
-    p.addEventListener('click',()=>{
-      document.querySelectorAll('.pill').forEach(i=>i.classList.remove('active'));
-      p.classList.add('active');
-      state.pill = p.getAttribute('data-pill');
-      applyPill();
-    });
-  });
-  function applyPill(){
-    const iaOnly = document.querySelectorAll('.ia-only');
-    iaOnly.forEach(el=> el.style.display = (state.pill==='ia' || state.pill==='advanced') ? 'inline-flex' : 'none');
-  }
-  applyPill();
-
-  /* ======= Galería de plantillas ======= */
-  const gallery = document.getElementById('gallery');
-  const subtitle = document.querySelector('#view-galeria .muted');
-
-  function renderGallery(){
-    gallery.innerHTML = '';
-    const byName = new Set(TEMPLATES.map(t=>t.name));
-    const byVariant = new Set(TEMPLATES.map(t=>t.variant));
-    subtitle.textContent = `${byName.size} formatos × ${byVariant.size} variantes. Haz click para abrir en el editor.`;
-
-    TEMPLATES.forEach(tpl=>{
-      const tile = document.createElement('div');
-      tile.className = 'tile card';
-      tile.style.position = 'relative';
-
-      // badges
-      const premiumBadge = tpl.premium ? 
-        `<span class="badge" style="position:absolute;top:8px;left:8px;background:rgba(50,224,197,.15);border-color:rgba(50,224,197,.35);color:var(--lp-mint)">Premium</span>` : '';
-      const soonBadge = !tpl.disponible ?
-        `<span class="badge" style="position:absolute;top:8px;right:8px;background:#92400e33;border-color:#b4530911;color:#ffd7a6">Próximamente</span>` : '';
-
-      tile.innerHTML = `
-        <div class="img" style="position:relative">
-          ${premiumBadge}${soonBadge}
-          <div class="logo">LP</div>
-        </div>
-        <div class="body">
-          <div style="font-weight:700">${tpl.name} · Var. ${tpl.variant}</div>
-          <div class="muted">Click para editar</div>
-        </div>
-      `;
-
-      if(!tpl.disponible){
-        tile.classList.add('locked');
-      } else {
-        tile.addEventListener('click',()=>{
-          state.currentTpl = tpl.id;
-          openEditor();
-          // Deep-link para el video o compartir
-          const url = new URL(window.location.href);
-          url.searchParams.set('template', tpl.id);
-          history.replaceState(null, '', url.toString());
-        });
-      }
-      gallery.appendChild(tile);
-    });
-  }
-  renderGallery();
-
-  /* ======= Deep-link: ?template=... ======= */
-  (function openFromQuery(){
-    const params = new URLSearchParams(location.search);
-    const tplId = params.get('template');
-    if(!tplId) return;
-    const tpl = TEMPLATES.find(t=>t.id===tplId && t.disponible);
-    if(tpl){
-      state.currentTpl = tpl.id;
-      openEditor();
+    function showView(view){
+      state.currentView = view;
+      document.querySelectorAll('.view').forEach(v=>v.style.display='none');
+      document.getElementById('view-'+view).style.display='block';
     }
-  })();
 
-  /* ======= Editor ======= */
-  function openEditor(){
-    document.querySelector('.side .item[data-view="editor"]').click();
-    renderPreview();
-  }
+    document.querySelectorAll('.pill').forEach(p=>{
+      p.addEventListener('click',()=>{
+        document.querySelectorAll('.pill').forEach(i=>i.classList.remove('active'));
+        p.classList.add('active');
+        state.pill = p.getAttribute('data-pill');
+        applyPill();
+      });
+    });
+    function applyPill(){
+      const iaOnly = document.querySelectorAll('.ia-only');
+      iaOnly.forEach(el=> el.style.display = (state.pill==='ia' || state.pill==='advanced') ? 'inline-flex' : 'none');
+    }
+    applyPill();
 
-  ['titulo','precio','ubic','amb','sup','tag'].forEach(id=>{
-    const el=document.getElementById('f-'+id);
-    if(!el) return;
-    el.addEventListener('input',renderPreview);
-    el.addEventListener('change',renderPreview);
-  });
-  document.getElementById('f-foto').addEventListener('change',(e)=>{
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ()=>{ state.fotoUrl = reader.result; renderPreview(); };
-    reader.readAsDataURL(file);
-  });
+    const formats = [
+      'Publicación cuadrada','Historia vertical','Banner feed FB','Ficha propiedad','Alquiler destacado','Oportunidad'
+    ];
+    const gallery = document.getElementById('gallery');
+    const tiles=[];
+    formats.forEach((name)=>{
+      ['A','B'].forEach(variant=>{
+        const tile=document.createElement('div');
+        tile.className='tile card';
+        tile.innerHTML=`<div class="img"><div class="logo">LP</div></div>
+          <div class="body">
+            <div style="font-weight:700">${name} · Var. ${variant}</div>
+            <div class="muted">Click para editar</div>
+          </div>`;
+        tile.addEventListener('click',()=>{ state.currentTpl = name+' '+variant; openEditor(); });
+        tiles.push(tile);
+      });
+    });
+    tiles.forEach(t=>gallery.appendChild(t));
 
-  function renderPreview(){
-    // datos (con defaults para demo)
-    const titulo = document.getElementById('f-titulo').value || '2 AMB • Palermo';
-    const precio = document.getElementById('f-precio').value || 'USD 120.000';
-    const ubic   = document.getElementById('f-ubic').value   || 'Palermo, CABA';
-    const amb    = document.getElementById('f-amb').value    || '2';
-    const sup    = document.getElementById('f-sup').value    || '60 m²';
-    const tag    = document.getElementById('f-tag').value    || '—';
-    const foto   = state.fotoUrl ? `<img src="${state.fotoUrl}" style="width:100%;height:160px;object-fit:cover;border-radius:10px;margin-bottom:8px;border:1px solid #ffffff26"/>` : '';
+    function openEditor(){
+      document.querySelector('.side .item[data-view="editor"]').click();
+      renderPreview();
+    }
 
-    // header con nombre de plantilla (si hay)
-    const tplName = (() => {
-      const tpl = TEMPLATES.find(t=>t.id===state.currentTpl);
-      return tpl ? `${tpl.name} · Var. ${tpl.variant}` : 'Elegí una plantilla para empezar';
-    })();
+    ['titulo','precio','ubic','amb','sup','tag'].forEach(id=>{
+      const el=document.getElementById('f-'+id);
+      if(!el) return;
+      el.addEventListener('input',renderPreview);
+      el.addEventListener('change',renderPreview);
+    });
+    document.getElementById('f-foto').addEventListener('change', (e)=>{
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ()=>{ state.fotoUrl = reader.result; renderPreview(); };
+      reader.readAsDataURL(file);
+    });
 
-    const html = `
-      <div style="border-radius:12px;overflow:hidden;background:linear-gradient(135deg,var(--lp-cyan),var(--lp-purple));padding:12px">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
-          <div style="display:flex;align-items:center;gap:8px">
-            <div class="logo" style="box-shadow:none">LP</div>
-            <div style="font-weight:800">Lupaprop</div>
+    function renderPreview(){
+      const titulo = document.getElementById('f-titulo').value || '2 AMB • Palermo';
+      const precio = document.getElementById('f-precio').value || 'USD 120.000';
+      const ubic = document.getElementById('f-ubic').value || 'Palermo, CABA';
+      const amb = document.getElementById('f-amb').value || '2';
+      const sup = document.getElementById('f-sup').value || '60 m²';
+      const tag = document.getElementById('f-tag').value || '—';
+      const foto = state.fotoUrl ? `<img src="${state.fotoUrl}" style="width:100%;height:160px;object-fit:cover;border-radius:10px;margin-bottom:8px;border:1px solid #ffffff26"/>` : '';
+
+      const html = `
+        <div style="border-radius:12px;overflow:hidden;background:linear-gradient(135deg,var(--lp-cyan),var(--lp-purple));padding:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="logo" style="box-shadow:none">LP</div>
+              <div style="font-weight:800">Lupaprop</div>
+            </div>
+            ${tag==='—' ? '' : `<span class="tag">${tag}</span>`}
           </div>
-          ${tag==='—' ? '' : `<span class="tag">${tag}</span>`}
-        </div>
-        <div style="margin-top:10px;background:#0b0f12;border:1px solid #ffffff1f;border-radius:10px;padding:12px">
-          <div class="muted" style="margin-bottom:6px">${tplName}</div>
-          ${foto}
-          <div style="font-size:20px;font-weight:800">${titulo}</div>
-          <div style="margin-top:4px;color:var(--muted)">${ubic} • ${amb} amb • ${sup}</div>
-          <div style="margin-top:8px;font-size:22px;font-weight:800;color:var(--lp-mint)">${precio}</div>
-          <div style="margin-top:10px;display:flex;gap:8px">
-            <button class="btn primary" style="padding:8px 12px">Contactar</button>
-            <button class="btn" style="padding:8px 12px">Ver propiedad</button>
+          <div style="margin-top:10px;background:#0b0f12;border:1px solid #ffffff1f;border-radius:10px;padding:12px">
+            ${foto}
+            <div style="font-size:20px;font-weight:800">${titulo}</div>
+            <div style="margin-top:4px;color:var(--muted)">${ubic} • ${amb} amb • ${sup}</div>
+            <div style="margin-top:8px;font-size:22px;font-weight:800;color:var(--lp-mint)">${precio}</div>
+            <div style="margin-top:10px;display:flex;gap:8px">
+              <button class="btn primary" style="padding:8px 12px">Contactar</button>
+              <button class="btn" style="padding:8px 12px">Ver propiedad</button>
+            </div>
           </div>
-        </div>
-      </div>`;
-    document.getElementById('preview').innerHTML = html;
-  }
+        </div>`;
+      document.getElementById('preview').innerHTML = html;
+    }
 
-  /* ======= Descargas simuladas ======= */
-  function simulateDownload(filename, content){
-    const blob = new Blob([content], {type:'text/plain'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = filename; a.click();
-    URL.revokeObjectURL(url);
-    document.getElementById('export-msg').textContent = 'Descarga iniciada (simulada).';
-    setTimeout(()=>document.getElementById('export-msg').textContent='',1500);
-  }
-  document.getElementById('btn-png').addEventListener('click',()=>simulateDownload('pieza.png','PNG simulado'));
-  document.getElementById('btn-pdf').addEventListener('click',()=>simulateDownload('pieza.pdf','PDF simulado'));
-  document.getElementById('btn-zip').addEventListener('click',()=>simulateDownload('piezas.zip','ZIP simulado'));
+    function simulateDownload(filename, content){
+      const blob = new Blob([content], {type:'text/plain'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename; a.click();
+      URL.revokeObjectURL(url);
+      document.getElementById('export-msg').textContent = 'Descarga iniciada (simulada).';
+      setTimeout(()=>document.getElementById('export-msg').textContent='',1500);
+    }
+    document.getElementById('btn-png').addEventListener('click',()=>simulateDownload('pieza.png','PNG simulado'));
+    document.getElementById('btn-pdf').addEventListener('click',()=>simulateDownload('pieza.pdf','PDF simulado'));
+    document.getElementById('btn-zip').addEventListener('click',()=>simulateDownload('piezas.zip','ZIP simulado'));
 
-  /* ======= Propuestas (demo) ======= */
-  const props = document.getElementById('props');
-  Array.from({length:6}).forEach((_,i)=>{
-    const card = document.createElement('div');
-    card.className='card';
-    card.style.padding='10px';
-    card.innerHTML=`<div class="tile"><div class="img"><div class="logo">LP</div></div></div>
-      <div class="row" style="justify-content:space-between;margin-top:8px">
-        <div><div style="font-weight:700">Propiedad #${i+1}</div><div class="muted">Palermo • 2 amb</div></div>
-        <input type="checkbox" disabled />
-      </div>`;
-    props.appendChild(card);
-  });
+    const props = document.getElementById('props');
+    Array.from({length:6}).forEach((_,i)=>{
+      const card = document.createElement('div');
+      card.className='card';
+      card.style.padding='10px';
+      card.innerHTML=`<div class="tile"><div class="img"><div class="logo">LP</div></div></div>
+        <div class="row" style="justify-content:space-between;margin-top:8px">
+          <div><div style="font-weight:700">Propiedad #${i+1}</div><div class="muted">Palermo • 2 amb</div></div>
+          <input type="checkbox" disabled />
+        </div>`;
+      props.appendChild(card);
+    });
 
-  /* ======= Calendario (demo) ======= */
-  const cal = document.getElementById('cal');
-  if(cal){
+    const cal = document.getElementById('cal');
     const days = Array.from({length:30}).map((_,i)=>i+1);
     days.forEach(d=>{
       const c = document.createElement('div');
@@ -470,15 +397,12 @@
       }
       cal.appendChild(c);
     });
-  }
 
-  /* ======= Botón marca (demo) ======= */
-  document.getElementById('btn-brand').addEventListener('click',()=>{
-    alert('Aplicación de logo/colores: para la demo ya está en paleta Lupaprop. Se puede conectar a un formulario para cargar logo y paleta en versiones futuras.');
-  });
+    document.getElementById('btn-brand').addEventListener('click',()=>{
+      alert('Aplicación de logo/colores: para la demo ya está en paleta Lupaprop. Se puede conectar a un formulario para cargar logo y paleta en versiones futuras.');
+    });
 
-  // Render inicial del editor (placeholder)
-  renderPreview();
+    renderPreview();
 </script>
 
 </body>
