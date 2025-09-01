@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Centro de Diseño Lupaprop — MVP Estático</title>
+  <meta name="description" content="Demo estática del Centro de Diseño Lupaprop. Solo inmobiliaria. Fase 1–3 con funciones simuladas." />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --lp-teal-dark:#00525B;
+      --lp-cyan:#01AAC7;
+      --lp-mint:#32E0C5;
+      --lp-purple:#3F005F;
+      --lp-purple-dark:#230038;
+      --lp-white:#ffffff;
+      --bg:#0b0f12;
+      --text:#e7e7e7;
+      --muted:#b9c1c7;
+      --sidebar:#0e2233;
+      --card:#0f151b;
+      --shadow: 0 10px 30px rgba(0,0,0,.25);
+      --radius:14px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Montserrat,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--text)}
+    a{color:inherit;text-decoration:none}
+    .app{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+    .side{background:var(--sidebar);padding:16px 14px;position:sticky;top:0;height:100vh}
+    .brand{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+    .logo{width:36px;height:36px;border-radius:10px;background:var(--lp-cyan);color:#041318;display:grid;place-content:center;font-weight:800;box-shadow:var(--shadow)}
+    .side .sec{margin-top:12px}
+    .side .item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;color:#eaf6f9;cursor:pointer}
+    .side .item.active{background:rgba(255,255,255,.08)}
+    .side .item:hover{background:rgba(255,255,255,.06)}
+    .badge{font-size:11px;padding:3px 8px;border-radius:999px;border:1px solid #ffffff24;color:#eaf6f9;background:transparent}
+    .badge.premium{background:rgba(50,224,197,.15);color:var(--lp-mint);border-color:rgba(50,224,197,.35)}
+    .main{padding:18px}
+    .toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+    .btn{border-radius:12px;padding:10px 14px;display:inline-flex;align-items:center;gap:8px;border:1px solid #ffffff22;background:#16232d;color:#eaf6f9;cursor:pointer}
+    .btn.primary{background:var(--lp-cyan);color:#041318;border-color:transparent;font-weight:700}
+    .btn.ghost{background:transparent}
+    .btn[disabled]{opacity:.5;cursor:not-allowed}
+    .card{background:var(--card);border:1px solid #ffffff17;border-radius:var(--radius);box-shadow:var(--shadow)}
+    .grid{display:grid;gap:12px}
+    .grid.cols-2{grid-template-columns:repeat(2,1fr)}
+    .grid.cols-3{grid-template-columns:repeat(3,1fr)}
+    .grid.cols-4{grid-template-columns:repeat(4,1fr)}
+    @media(max-width:1100px){.app{grid-template-columns:1fr}.side{position:static;height:auto}.grid.cols-3,.grid.cols-4{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:700px){.grid.cols-3,.grid.cols-4{grid-template-columns:1fr}}
+    .h{margin:0 0 10px;font-weight:800}
+    .muted{color:var(--muted);font-size:14px}
+    .tile{overflow:hidden}
+    .tile .img{aspect-ratio:1.2/1;background:linear-gradient(135deg,var(--lp-teal-dark),var(--lp-purple));display:grid;place-content:center}
+    .tile .body{padding:10px}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .notice{border:1px dashed #ffffff3a;border-radius:12px;padding:10px 12px;background:#0a1218}
+    .locked{opacity:.6;position:relative}
+    .locked::after{content:'Premium';position:absolute;top:8px;right:8px;font-size:11px;padding:2px 6px;border-radius:8px;background:rgba(63,0,95,.6)}
+    .editor{display:grid;grid-template-columns:1.2fr 1fr;gap:12px}
+    .canvas{aspect-ratio:16/9;border-radius:12px;border:1px solid #ffffff1f;display:grid;place-content:center;padding:12px;background:#0e0e0e}
+    .field{display:flex;flex-direction:column;gap:5px}
+    .field input,.field select{border-radius:10px;padding:10px;background:#09131a;border:1px solid #ffffff26;color:#e7e7e7}
+    .tab-nav{display:flex;gap:8px;margin-bottom:12px}
+    .pill{padding:8px 12px;border-radius:999px;border:1px solid #ffffff26;cursor:pointer}
+    .pill.active{background:rgba(1,170,199,.15);border-color:var(--lp-cyan);color:var(--lp-cyan);font-weight:700}
+    .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+    .calendar .cell{padding:10px;border-radius:10px;background:#0a131a;border:1px solid #ffffff15;min-height:70px;position:relative}
+    .event{position:absolute;left:8px;right:8px;bottom:8px;background:rgba(1,170,199,.15);border:1px solid rgba(1,170,199,.35);color:#b9f6ff;padding:4px 6px;border-radius:8px;font-size:12px}
+    .event.green{background:rgba(50,224,197,.15);border-color:rgba(50,224,197,.4);color:#d4fff7}
+    .event.purple{background:rgba(63,0,95,.25);border-color:rgba(63,0,95,.5);color:#f3e6ff}
+    .suggest{border-left:3px solid var(--lp-cyan);padding:10px;border-radius:10px;background:#0a1218}
+    .tag{font-size:11px;padding:2px 8px;border-radius:999px;background:#ffffff10;border:1px solid #ffffff25}
+    .kbd{font-family:ui-monospace, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;font-size:12px;padding:2px 6px;border-radius:6px;background:#0e1b24;border:1px solid #ffffff22}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="side">
+      <div class="brand">
+        <div class="logo">LP</div>
+        <div>
+          <div style="font-weight:800">Centro de Diseño</div>
+          <div class="muted" style="font-size:12px">Lupaprop</div>
+        </div>
+      </div>
+      <div class="sec">
+        <div class="item active" data-view="galeria">📚 Galería de plantillas</div>
+        <div class="item" data-view="editor">✏️ Editor</div>
+        <div class="item" data-view="propuestas">📄 Propuestas PDF <span class="badge premium">Premium</span></div>
+        <div class="item" data-view="calendario">🗓️ Calendario <span class="badge premium">Premium</span></div>
+      </div>
+      <div class="sec" style="margin-top:auto">
+        <div class="notice muted">Para integrarlo en tu panel (debajo de “Seguimiento”):<br>
+          <span class="kbd">&lt;a href="https://TU-DOMINIO.vercel.app" target="_blank"&gt;Centro de Diseño&lt;/a&gt;</span>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="toolbar">
+        <div class="row">
+          <span class="pill active" data-pill="mvp">MVP</span>
+          <span class="pill" data-pill="ia">IA</span>
+          <span class="pill" data-pill="advanced">Avanzado</span>
+        </div>
+        <div class="row">
+          <button class="btn primary" id="btn-brand">Aplicar mi logo y colores</button>
+        </div>
+      </div>
+
+      <section id="view-galeria" class="view card" style="padding:16px">
+        <h2 class="h">Galería de plantillas (Inmobiliaria)</h2>
+        <p class="muted">6 formatos × 2 variantes. Haz click para abrir en el editor.</p>
+        <div class="grid cols-3" id="gallery"></div>
+      </section>
+
+      <section id="view-editor" class="view card" style="padding:16px;display:none">
+        <div class="row" style="justify-content:space-between">
+          <h2 class="h">Editor simple</h2>
+          <div class="row">
+            <button class="btn ghost ia-only" id="btn-ai-photo">✨ Mejorar foto con IA</button>
+            <button class="btn ghost ia-only" id="btn-ai-copy">⚡✍️ Generar texto automático</button>
+          </div>
+        </div>
+        <div class="editor">
+          <div class="canvas" id="preview">Elegí una plantilla para empezar</div>
+          <div class="grid cols-1">
+            <div class="card" style="padding:12px">
+              <div class="row" style="justify-content:space-between">
+                <div style="font-weight:700">Datos</div>
+                <span class="tag">Fase 1 — Gratis</span>
+              </div>
+              <div class="grid cols-2" style="margin-top:8px">
+                <label class="field">
+                  <span class="muted">Título</span>
+                  <input id="f-titulo" placeholder="2 AMB • Palermo" />
+                </label>
+                <label class="field">
+                  <span class="muted">Precio</span>
+                  <input id="f-precio" placeholder="USD 120.000" />
+                </label>
+                <label class="field">
+                  <span class="muted">Ubicación</span>
+                  <input id="f-ubic" placeholder="Palermo, CABA" />
+                </label>
+                <label class="field">
+                  <span class="muted">Ambientes</span>
+                  <input id="f-amb" placeholder="2" />
+                </label>
+                <label class="field">
+                  <span class="muted">Superficie</span>
+                  <input id="f-sup" placeholder="60 m²" />
+                </label>
+                <label class="field">
+                  <span class="muted">Etiqueta</span>
+                  <select id="f-tag">
+                    <option>—</option>
+                    <option>Oportunidad</option>
+                    <option>Nuevo</option>
+                    <option>Reservado</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+
+            <div class="card" style="padding:12px">
+              <div class="row" style="justify-content:space-between">
+                <div style="font-weight:700">Imagen</div>
+                <span class="tag">Fase 1 — Gratis</span>
+              </div>
+              <div class="row" style="margin-top:8px">
+                <input type="file" id="f-foto" accept="image/*" class="btn" />
+                <span class="muted">o arrastra una foto (simulado)</span>
+              </div>
+            </div>
+
+            <div class="card" style="padding:12px">
+              <div class="row" style="justify-content:space-between">
+                <div style="font-weight:700">Exportar</div>
+                <span class="tag">Fase 1 — Gratis</span>
+              </div>
+              <div class="row" style="margin-top:8px">
+                <button class="btn primary" id="btn-png">Descargar PNG</button>
+                <button class="btn" id="btn-pdf">Descargar PDF</button>
+                <button class="btn" id="btn-zip">Descargar ZIP</button>
+                <span id="export-msg" class="muted"></span>
+              </div>
+            </div>
+
+            <div class="card locked ia-only" style="padding:12px">
+              <div class="row" style="justify-content:space-between">
+                <div style="font-weight:700">Funciones IA</div>
+                <span class="tag">Fase 2 — Premium</span>
+              </div>
+              <p class="muted">Estas opciones están bloqueadas en plan Gratis.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-propuestas" class="view card" style="padding:16px;display:none">
+        <div class="row" style="justify-content:space-between">
+          <h2 class="h">Propuestas PDF (dossier A4)</h2>
+          <span class="tag">Fase 2 — Premium</span>
+        </div>
+        <p class="muted">Seleccioná propiedades y generá un dossier visual (simulado).</p>
+        <div class="grid cols-3" id="props"></div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn primary">Generar dossier visual</button>
+          <span class="muted">Bloqueado en plan Gratis.</span>
+        </div>
+      </section>
+
+      <section id="view-calendario" class="view card" style="padding:16px;display:none">
+        <div class="row" style="justify-content:space-between">
+          <h2 class="h">Calendario de campañas</h2>
+          <span class="tag">Fase 3 — Premium</span>
+        </div>
+        <div class="grid cols-3">
+          <div>
+            <div class="muted">Junio — Vista mensual (demo)</div>
+            <div class="calendar" style="margin-top:10px" id="cal"></div>
+          </div>
+          <div class="grid cols-1" style="gap:10px">
+            <div class="suggest">
+              <div style="font-weight:700">IA: sugerencias de copies</div>
+              <p class="muted" style="margin:6px 0 8px">Contenido de ejemplo (bloqueado en plan Gratis).</p>
+              <ul class="muted">
+                <li>“Esta semana, conocé los 2 amb. con balcón en Palermo — agendá visita”</li>
+                <li>“¡Oportunidad! Bajas de precio en Núñez. Consultanos.”</li>
+              </ul>
+            </div>
+            <div class="suggest">
+              <div style="font-weight:700">Eventos destacados</div>
+              <p class="muted">Día del Padre, Fiestas, Feriados locales, etc.</p>
+              <button class="btn">Usar plantilla recomendada</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    const state = {
+      plan: 'free',
+      currentView: 'galeria',
+      pill: 'mvp',
+      currentTpl: null,
+      fotoUrl: null,
+    };
+
+    document.querySelectorAll('.side .item').forEach(el=>{
+      el.addEventListener('click',()=>{
+        document.querySelectorAll('.side .item').forEach(i=>i.classList.remove('active'));
+        el.classList.add('active');
+        const view = el.getAttribute('data-view');
+        showView(view);
+      });
+    });
+    function showView(view){
+      state.currentView = view;
+      document.querySelectorAll('.view').forEach(v=>v.style.display='none');
+      document.getElementById('view-'+view).style.display='block';
+    }
+
+    document.querySelectorAll('.pill').forEach(p=>{
+      p.addEventListener('click',()=>{
+        document.querySelectorAll('.pill').forEach(i=>i.classList.remove('active'));
+        p.classList.add('active');
+        state.pill = p.getAttribute('data-pill');
+        applyPill();
+      });
+    });
+    function applyPill(){
+      const iaOnly = document.querySelectorAll('.ia-only');
+      iaOnly.forEach(el=> el.style.display = (state.pill==='ia' || state.pill==='advanced') ? 'inline-flex' : 'none');
+    }
+    applyPill();
+
+    const formats = [
+      'Publicación cuadrada','Historia vertical','Banner feed FB','Ficha propiedad','Alquiler destacado','Oportunidad'
+    ];
+    const gallery = document.getElementById('gallery');
+    const tiles=[];
+    formats.forEach((name)=>{
+      ['A','B'].forEach(variant=>{
+        const tile=document.createElement('div');
+        tile.className='tile card';
+        tile.innerHTML=`<div class="img"><div class="logo">LP</div></div>
+          <div class="body">
+            <div style="font-weight:700">${name} · Var. ${variant}</div>
+            <div class="muted">Click para editar</div>
+          </div>`;
+        tile.addEventListener('click',()=>{ state.currentTpl = name+' '+variant; openEditor(); });
+        tiles.push(tile);
+      });
+    });
+    tiles.forEach(t=>gallery.appendChild(t));
+
+    function openEditor(){
+      document.querySelector('.side .item[data-view="editor"]').click();
+      renderPreview();
+    }
+
+    ['titulo','precio','ubic','amb','sup','tag'].forEach(id=>{
+      const el=document.getElementById('f-'+id);
+      if(!el) return;
+      el.addEventListener('input',renderPreview);
+      el.addEventListener('change',renderPreview);
+    });
+    document.getElementById('f-foto').addEventListener('change', (e)=>{
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ()=>{ state.fotoUrl = reader.result; renderPreview(); };
+      reader.readAsDataURL(file);
+    });
+
+    function renderPreview(){
+      const titulo = document.getElementById('f-titulo').value || '2 AMB • Palermo';
+      const precio = document.getElementById('f-precio').value || 'USD 120.000';
+      const ubic = document.getElementById('f-ubic').value || 'Palermo, CABA';
+      const amb = document.getElementById('f-amb').value || '2';
+      const sup = document.getElementById('f-sup').value || '60 m²';
+      const tag = document.getElementById('f-tag').value || '—';
+      const foto = state.fotoUrl ? `<img src="${state.fotoUrl}" style="width:100%;height:160px;object-fit:cover;border-radius:10px;margin-bottom:8px;border:1px solid #ffffff26"/>` : '';
+
+      const html = `
+        <div style="border-radius:12px;overflow:hidden;background:linear-gradient(135deg,var(--lp-cyan),var(--lp-purple));padding:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="logo" style="box-shadow:none">LP</div>
+              <div style="font-weight:800">Lupaprop</div>
+            </div>
+            ${tag==='—' ? '' : `<span class="tag">${tag}</span>`}
+          </div>
+          <div style="margin-top:10px;background:#0b0f12;border:1px solid #ffffff1f;border-radius:10px;padding:12px">
+            ${foto}
+            <div style="font-size:20px;font-weight:800">${titulo}</div>
+            <div style="margin-top:4px;color:var(--muted)">${ubic} • ${amb} amb • ${sup}</div>
+            <div style="margin-top:8px;font-size:22px;font-weight:800;color:var(--lp-mint)">${precio}</div>
+            <div style="margin-top:10px;display:flex;gap:8px">
+              <button class="btn primary" style="padding:8px 12px">Contactar</button>
+              <button class="btn" style="padding:8px 12px">Ver propiedad</button>
+            </div>
+          </div>
+        </div>`;
+      document.getElementById('preview').innerHTML = html;
+    }
+
+    function simulateDownload(filename, content){
+      const blob = new Blob([content], {type:'text/plain'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename; a.click();
+      URL.revokeObjectURL(url);
+      document.getElementById('export-msg').textContent = 'Descarga iniciada (simulada).';
+      setTimeout(()=>document.getElementById('export-msg').textContent='',1500);
+    }
+    document.getElementById('btn-png').addEventListener('click',()=>simulateDownload('pieza.png','PNG simulado'));
+    document.getElementById('btn-pdf').addEventListener('click',()=>simulateDownload('pieza.pdf','PDF simulado'));
+    document.getElementById('btn-zip').addEventListener('click',()=>simulateDownload('piezas.zip','ZIP simulado'));
+
+    const props = document.getElementById('props');
+    Array.from({length:6}).forEach((_,i)=>{
+      const card = document.createElement('div');
+      card.className='card';
+      card.style.padding='10px';
+      card.innerHTML=`<div class="tile"><div class="img"><div class="logo">LP</div></div></div>
+        <div class="row" style="justify-content:space-between;margin-top:8px">
+          <div><div style="font-weight:700">Propiedad #${i+1}</div><div class="muted">Palermo • 2 amb</div></div>
+          <input type="checkbox" disabled />
+        </div>`;
+      props.appendChild(card);
+    });
+
+    const cal = document.getElementById('cal');
+    const days = Array.from({length:30}).map((_,i)=>i+1);
+    days.forEach(d=>{
+      const c = document.createElement('div');
+      c.className='cell';
+      c.innerHTML = '<div style="font-size:12px;color:#93a2ad">'+d+'</div>';
+      if([2,8,14,21].includes(d)){
+        const e = document.createElement('div');
+        e.className='event' + (d===14?' purple':'');
+        e.textContent = d===14? 'Día del Padre' : 'Campaña redes';
+        c.appendChild(e);
+      }
+      if(d===24){
+        const e = document.createElement('div');
+        e.className='event green';
+        e.textContent = 'Feriado local';
+        c.appendChild(e);
+      }
+      cal.appendChild(c);
+    });
+
+    document.getElementById('btn-brand').addEventListener('click',()=>{
+      alert('Aplicación de logo/colores: para la demo ya está en paleta Lupaprop. Se puede conectar a un formulario para cargar logo y paleta en versiones futuras.');
+    });
+
+    renderPreview();
+  </script>
+</body>
+</html>
